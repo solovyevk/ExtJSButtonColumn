@@ -1,1 +1,1 @@
-ExtComp READMY UPDATED
+ExtComp READMY INTELLIJ test
