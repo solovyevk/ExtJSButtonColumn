@@ -1,1 +1,1 @@
-ExtComp READMY INTELLIJ test
+A Ext.grid.column.Column subclass which renders a button in each column cell
