@@ -1,4 +1,4 @@
-Ext.define('Ext.ux.ButtonColumn.MenuItem', {
+Ext.define('Ext.ux.ButtonColumnMenuItem', {
   extend: 'Ext.menu.Item',
 
   setState: function (state) {
@@ -19,7 +19,7 @@ Ext.define('Ext.ux.ButtonColumn.MenuItem', {
     if (me.hideOnClick) {
       me.deferHideParentMenusTimer = Ext.defer(me.deferHideParentMenus, me.clickHideDelay, me);
     }
-
+    /*This is the only difference, we pass state as 2nd argument*/
     Ext.callback(me.handler, me.scope || me, [me, me.state, e]);
     me.fireEvent('click', me, e);
 
@@ -80,10 +80,10 @@ Ext.define('Ext.ux.ButtonColumn', {
   menuAlign: 'tl-bl?',
 
   sortable: false,
-  /* @cfg {String}  btnCaption
+  /* @cfg {String}  buttonText
    * If defined, will be button text.
    */
-  // btnCaption: '-Actions->',
+  // buttonText: '-Actions->',
 
 
   btnRe: new RegExp(Ext.baseCSSPrefix + 'btn'),
@@ -94,7 +94,7 @@ Ext.define('Ext.ux.ButtonColumn', {
 
   btnTpl: '<em class="{triggerCls}">' +
           '<button autocomplete="off" role="button" hidefocus="true" type="button" class="x-btn-center" aria-haspopup="true">' +
-          '<span class="x-btn-inner">{btnCaption}</span>' +
+          '<span class="x-btn-inner">{buttonText}</span>' +
           '<span class="x-btn-icon {iconCls}">&nbsp;</span>' +
           '</button>' +
           '</em>',
@@ -113,31 +113,21 @@ Ext.define('Ext.ux.ButtonColumn', {
       if (items) {
         var i, l = items.length
         for (i = 0; i < l; i++) {
-          this.menu.add(new EMS.view.component.grid.MenuItem(items[i]));
+          this.menu.add(new Ext.ux.ButtonColumnMenuItem(items[i]));
         }
       }
     }
     //init template
     me.initBtnTpl();
     me.renderer = function (v, meta, record) {
-      var data = Ext.apply({}, record.data, record.getAssociatedData()),
-        btnCaption = me.btnCaption;
-      v = Ext.isFunction(cfg.renderer) ? cfg.renderer.apply(this, arguments) : v;
-      btnCaption = btnCaption ? btnCaption : Ext.isEmpty(v) ? '--Action--' : v;
+      var data ={};
+      data.buttonText = me.buttonText;
+      data.iconCls =  Ext.isFunction(me.getClass) ? me.getClass.apply(me, arguments) : (me.iconCls || 'x-hide-display');
       //allocate place for icon on button
-      Ext.apply(data, {btnCaption: btnCaption,
-        iconClsBtn: (me.iconCls || data.iconCls) ? me.getBtnCls('icon-text-left').join(' ') : me.getBtnCls('noicon').join(' ')
-      }, {});
-      //setup config iconCls if there is no one in record
-      Ext.applyIf(data, {iconCls: me.iconCls ? me.iconCls : 'x-hide-display'});
-      //disable button with config isDisabledFn
-      if (me.isDisabledFn && me.isDisabledFn.call(me, v, meta, record)) {
-        Ext.apply(data,
-          {disabledCls: Ext.isIE7 ? me.disabledCls : me.disabledCls + ' ' + me.getBtnCls('disabled').join(' ')},
-          {});
-      }
-      Ext.apply(data, {btnCaption: btnCaption}, {});
-
+      data.iconClsBtn = data.iconCls === 'x-hide-display' ? me.getBtnCls('noicon').join(' ') : me.getBtnCls('icon-text-left').join(' ');
+      data.disabledCls = me.isDisabledFn && me.isDisabledFn.apply(me, arguments) ? me.disabledCls + ' ' + me.getBtnCls('disabled').join(' ')/*(Ext.isIE7 ? me.disabledCls : me.disabledCls + ' ' + me.getBtnCls('disabled').join(' '))*/ : '';
+      v = Ext.isFunction(cfg.renderer) ? cfg.renderer.apply(this, arguments) : v;
+      data.buttonText = data.buttonText ? data.buttonText : Ext.isEmpty(v) ? '--Action--' : v;
       return me.btnTpl.apply(data);
     };
   },
@@ -272,4 +262,3 @@ Ext.define('Ext.ux.ButtonColumn', {
     return items || [];
   }
 });
-

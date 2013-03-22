@@ -2,31 +2,68 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Extjs ButtonColumn Use Examples</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>Extjs ButtonColumn Use Examples</title>
 
-    <link rel="stylesheet" type="text/css"
-          href="http://extjs-public.googlecode.com/svn/extjs-4.x/release/resources/css/ext-all.css"/>
+<link rel="stylesheet" type="text/css"
+      href="http://extjs-public.googlecode.com/svn/extjs-4.x/release/resources/css/ext-all.css"/>
 
-    <script type="text/javascript" src="http://extjs-public.googlecode.com/svn/extjs-4.x/include/ext-all.js"></script>
-    <script type="text/javascript" src="src/ux/ButtonColumn.js"></script>
+<script type="text/javascript" src="http://extjs-public.googlecode.com/svn/extjs-4.x/include/ext-all.js"></script>
+<!--<link rel="stylesheet" type="text/css" href="extjs/resources/css/ext-all.css"/>
+
+<script type="text/javascript" src="extjs/ext-all-dev.js"></script>-->
+
+<script type="text/javascript">
+    Ext.Loader.setConfig({
+        enabled: true,
+        paths: {
+            "Ext": "extjs/src"
+        },
+        disableCaching: false
+    });
+    //Ext.Loader.require(['EMS.view.Viewport', 'EMS.util.EmsJsonReader','EMS.store.ws.AcceptanceRecordStore','EMS.view.eng.congressional.Search']);
+</script>
+
+<script type="text/javascript" src="src/ux/ButtonColumn.js"></script>
+<style type="text/css">
+    .delete-btn {
+        background-image: url(resources/images/delete.png) !important;
+    }
+
+    .add-btn {
+        background-image: url(resources/images/add.png) !important;
+    }
+
+    .wait-btn {
+        background-image: url(resources/images/hourglass.png) !important;
+    }
+
+    .verify-btn {
+        background-image: url(resources/images/flag_yellow.png) !important;
+    }
+
+    .execute-btn {
+        background-image: url(resources/images/cog.png) !important;
+    }
+</style>
 
 
-    <script type="text/javascript">
-        Ext.define('StackDataModel', {
-            extend: 'Ext.data.Model',
-            fields: [
-                {name: 'company'},
-                {name: 'price', type: 'float'},
-                {name: 'change', type: 'float'},
-                {name: 'pctChange', type: 'float'},
-                {name: 'lastChange', type: 'date', dateFormat: 'n/j h:ia'}
-            ]
-        });
-        Ext.onReady(function () {
+<script type="text/javascript">
+Ext.define('StackDataModel', {
+    extend: 'Ext.data.Model',
+    fields: [
+        {name: 'company', type: 'string'},
+        {name: 'price', type: 'float'},
+        {name: 'change', type: 'float'},
+        {name: 'pctChange', type: 'float'},
+        {name: 'lastChange', type: 'date', dateFormat: 'n/j h:ia'}
+    ]
+});
+Ext.onReady(function () {
+    Ext.log('START');
 
-            // sample static data for the store
-            var myData = [
+    // sample static data for the store
+    var myData = [
                 ['3m Co', 71.72, 0.02, 0.03, '9/1 12:00am'],
                 ['Alcoa Inc', 29.01, 0.42, 1.47, '9/1 12:00am'],
                 ['Altria Group Inc', 83.81, 0.28, 0.34, '9/1 12:00am'],
@@ -56,132 +93,475 @@
                 ['United Technologies Corporation', 63.26, 0.55, 0.88, '9/1 12:00am'],
                 ['Verizon Communications', 35.57, 0.39, 1.11, '9/1 12:00am'],
                 ['Wal-Mart Stores, Inc.', 45.45, 0.73, 1.63, '9/1 12:00am']
-            ];
-
-
-            // create the data store
-            var store = Ext.create('Ext.data.ArrayStore', {
+            ], store = Ext.create('Ext.data.ArrayStore', {
                 model: 'StackDataModel',
                 data: myData
+            }),
+            commonColumns = [
+                {
+                    text: 'Company',
+                    flex: 1,
+                    sortable: false,
+                    dataIndex: 'company'
+                },
+                {
+                    text: 'Change',
+                    width: 75,
+                    sortable: true,
+                    renderer: change,
+                    dataIndex: 'change'
+                },
+                {
+                    text: '% Change',
+                    width: 75,
+                    sortable: true,
+                    renderer: pctChange,
+                    dataIndex: 'pctChange'
+                },
+                {
+                    text: 'Last Updated',
+                    width: 85,
+                    sortable: true,
+                    renderer: Ext.util.Format.dateRenderer('m/d/Y'),
+                    dataIndex: 'lastChange'
+                }
+            ],
+            format = Ext.String.format;
+
+    /**
+     * Custom function used for column renderer
+     * @param {Object} val
+     */
+    function change(val) {
+        if (val > 0) {
+            return '<span style="color:green;">' + val + '</span>';
+        } else if (val < 0) {
+            return '<span style="color:red;">' + val + '</span>';
+        }
+        return val;
+    }
+
+    /**
+     * Custom function used for column renderer
+     * @param {Object} val
+     */
+    function pctChange(val) {
+        if (val > 0) {
+            return '<span style="color:green;">' + val + '%</span>';
+        } else if (val < 0) {
+            return '<span style="color:red;">' + val + '%</span>';
+        }
+        return val;
+    }
+
+    /*Performance Test variables*/
+    var performanceTab,
+            startTime,
+            btnNumber = 100,
+            btnToRenderCount = btnNumber,
+            btnCellIds = [],
+            buttons = [],
+            oldButtons = [],
+            bigDataSet = [],
+            performanceStore = Ext.create('Ext.data.ArrayStore', {
+                fields: [
+                    {name: 'number', type: 'int'}
+                ]
+            }),
+            buttonsNumberField = Ext.create('Ext.form.field.Number', {
+                width: 60,
+                value: btnNumber,
+                maxValue: 1000,
+                minValue: 10
+            }),
+            columnButtonGridRenderingTimeLabel = Ext.create('Ext.form.field.Text', {
+                width: 50,
+                readOnly: true
+            }),
+            realButtonGridRenderingTimeLabel = Ext.create('Ext.form.field.Text', {
+                width: 50,
+                readOnly: true
+            }),
+            buttonsRenderingTimeLabel = Ext.create('Ext.form.field.Text', {
+                width: 60,
+                readOnly: true
             });
 
-            /**
-             * Custom function used for column renderer
-             * @param {Object} val
-             */
-            function change(val) {
-                if (val > 0) {
-                    return '<span style="color:green;">' + val + '</span>';
-                } else if (val < 0) {
-                    return '<span style="color:red;">' + val + '</span>';
-                }
-                return val;
-            }
-
-            /**
-             * Custom function used for column renderer
-             * @param {Object} val
-             */
-            function pctChange(val) {
-                if (val > 0) {
-                    return '<span style="color:green;">' + val + '%</span>';
-                } else if (val < 0) {
-                    return '<span style="color:red;">' + val + '%</span>';
-                }
-                return val;
-            }
-
-            Ext.create('Ext.tab.Panel', {
-                width: 700,
-                height: 800,
-                renderTo: 'examples',
-                items: [
+    Ext.create('Ext.tab.Panel', {
+        width: 800,
+        height: 500,
+        renderTo: 'examples',
+        defaults: {
+            xtype: 'grid'
+        },
+        items: [
+            {
+                title: 'Simple Menu',
+                store: store,
+                columns: commonColumns.concat([
                     {
-                        xtype: 'grid',
-                        title: 'First',
-                        store: store,
-                        columns: [
-                            {
-                                text: 'Company',
-                                flex: 1,
-                                sortable: false,
-                                dataIndex: 'company'
-                            },
-                            {
-                                text: 'Price',
-                                width: 75,
-                                sortable: true,
-                                renderer: 'usMoney',
-                                dataIndex: 'price'
-                            },
-                            {
-                                text: 'Change',
-                                width: 75,
-                                sortable: true,
-                                renderer: change,
-                                dataIndex: 'change'
-                            },
-                            {
-                                text: '% Change',
-                                width: 75,
-                                sortable: true,
-                                renderer: pctChange,
-                                dataIndex: 'pctChange'
-                            },
-                            {
-                                text: 'Last Updated',
-                                width: 85,
-                                sortable: true,
-                                renderer: Ext.util.Format.dateRenderer('m/d/Y'),
-                                dataIndex: 'lastChange'
-                            },
-                            {
-                                xtype: 'buttoncolumn',
-                                width: 100
-                                /*items: [
-                                    {
-                                        icon: '../shared/icons/fam/delete.gif',  // Use a URL in the icon config
-                                        tooltip: 'Sell stock',
-                                        handler: function (grid, rowIndex, colIndex) {
-                                            var rec = store.getAt(rowIndex);
-                                            alert("Sell " + rec.get('company'));
-                                        }
-                                    },
-                                    {
-                                        getClass: function (v, meta, rec) {          // Or return a class from a function
-                                            if (rec.get('change') < 0) {
-                                                this.items[1].tooltip = 'Hold stock';
-                                                return 'alert-col';
-                                            } else {
-                                                this.items[1].tooltip = 'Buy stock';
-                                                return 'buy-col';
-                                            }
-                                        },
-                                        handler: function (grid, rowIndex, colIndex) {
-                                            var rec = store.getAt(rowIndex);
-                                            alert((rec.get('change') < 0 ? "Hold " : "Buy ") + rec.get('company'));
-                                        }
-                                    }
-                                ]*/
-                            }
-                        ],
-                        viewConfig: {
-                            stripeRows: true
-                        }
+                        text: 'Price',
+                        width: 75,
+                        sortable: true,
+                        renderer: 'usMoney',
+                        dataIndex: 'price'
                     },
                     {
-                        title: 'Bar',
-                        tabConfig: {
-                            title: 'Custom Title',
-                            tooltip: 'A button tooltip'
+                        xtype: 'buttoncolumn',
+                        width: 100,
+                        iconCls: 'execute-btn',
+                        buttonText: 'Actions',
+                        handler: function (grid, rowIndex, colIndex) {
+                            var rec = grid.getStore().getAt(rowIndex);
+                            alert(Ext.String.format('Please select & execute Action for "{0}"', rec.get('company')));
+                        },
+                        isDisabledFn: function (v, meta, record) {
+                            var a = arguments;
+                            return record.get('price') > 70;
+                        },
+                        items: [
+                            {
+                                iconCls: 'delete-btn',
+                                text: 'Sell stock',
+                                tooltip: 'Sell stock',
+                                handler: function (item, data) {
+                                    var rec = data.record;
+                                    alert(format('Cell "{0}"', rec.get('company')));
+                                }
+
+                            },
+                            {
+                                iconCls: 'add-btn',
+                                text: 'Buy stock',
+                                tooltip: 'Buy stock',
+                                handler: function (item, data) {
+                                    var rec = data.record;
+                                    alert(format('Buy "{0}"', rec.get('company')));
+                                }
+                            }
+                        ]
+                    }
+                ]),
+                viewConfig: {
+                    stripeRows: true
+                }
+            },
+            {
+                title: 'Just a Button',
+                store: store,
+                columns: [
+                    {
+                        text: 'Company',
+                        flex: 1,
+                        sortable: false,
+                        dataIndex: 'company'
+                    },
+                    {
+                        xtype: 'buttoncolumn',
+                        header: 'Buy',
+                        width: 100,
+                        dataIndex: 'price',
+                        sortable: true,
+                        renderer: function (v) {
+                            return 'Buy for ' + Ext.util.Format.usMoney(v)
+                        },
+                        handler: function (grid, rowIndex, colIndex) {
+                            var rec = grid.getStore().getAt(rowIndex);
+                            alert(format('Got "{0}" stock', rec.get('company')));
                         }
+
+                    },
+                    {
+                        text: 'Last Updated',
+                        width: 85,
+                        sortable: true,
+                        renderer: Ext.util.Format.dateRenderer('m/d/Y'),
+                        dataIndex: 'lastChange'
                     }
                 ]
-            });
+            },
+            {
+                title: 'Dynamic Menu',
+                store: store,
+                columns: commonColumns.concat([
+                    {
+                        text: 'Price',
+                        width: 75,
+                        sortable: true,
+                        renderer: 'usMoney',
+                        dataIndex: 'price'
+                    },
+                    {
+                        xtype: 'buttoncolumn',
+                        width: 100,
+                        buttonText: 'Actions',
+                        getClass: function (v, meta, rec) {          // Or return a class from a function
+                            if (rec.get('price') > 60) {
+                                return 'verify-btn';
+                            } else {
+                                return '';
+                            }
+                        },
+                        setupMenu: function (record, rowIndex) {
+                            var actions = [],
+                                    price = record.get('price'),
+                                    change = record.get('change'),
+                                    company = record.get('company');
+                            actions.push({
+                                iconCls: 'delete-btn',
+                                text: 'Sell stock',
+                                handler: function (item) {
+                                    alert(format('Cell "{0}"', company));
+                                }
+                            });
+                            actions.push({
+                                iconCls: 'add-btn',
+                                text: 'Buy stock',
+                                handler: function (item) {
+                                    alert(format('Buy "{0}"', company));
+                                }
+                            });
+                            //Add this action if negative
+                            if (change < 0) {
+                                actions.push({
+                                    iconCls: 'wait-btn',
+                                    text: 'Hold stock',
+                                    handler: function (item) {
+                                        alert(format('Hold "{0}"', company));
+                                    }
+                                });
+                            }
+                            //Verify if price too high
+                            if (price > 60) {
+                                actions.push({
+                                    iconCls: 'verify-btn',
+                                    text: 'Verify price',
+                                    handler: function (item) {
+                                        alert(format('Verify price: "{0}"', price));
+                                    }
+                                });
+                            }
+                            return actions;
+                        }
+                    }
+                ]),
+                viewConfig: {
+                    stripeRows: true
+                }
+            },
+            {
+                title: 'Performance Test',
+                xtype: 'panel',
+                layout: {
+                    type: 'hbox',
+                    align: 'stretch'
+                },
+                defaults: {
+                    xtype: 'grid',
+                    flex: 1,
+                    autoScroll: true
+                    //border: false
+                },
+                tbar: [
+                    {xtype: 'button',
+                        text: 'Render',
+                        iconCls: 'wait-btn',
+                        handler: function () {
+                            var me = this,
+                                    performanceTab = performanceTab || me.up('panel'),
+                                    //loadMask = new Ext.LoadMask(performanceTab),
+                                    interval = 1,
+                                    isBtnRenderingDone = function () {
+                                        if (btnToRenderCount === 0) {
+                                            var allDoneTime = new Date().getTime() - startTime;
+                                            buttonsRenderingTimeLabel.setValue(allDoneTime);
+                                            //loadMask.hide();
+                                            Ext.log('All Buttons rendered');
+                                        } else {
+                                            Ext.log('Refire isBtnRenderingDone:' + btnToRenderCount);
+                                            Ext.defer(isBtnRenderingDone, interval, me);
+                                        }
+                                    };
+                            //loadMask.show();
+                            startTime = new Date().getTime();
+                            bigDataSet = [];
+                            btnToRenderCount = buttonsNumberField.getValue();
+                            for (var i = 0; i < btnToRenderCount; i++) {
+                                bigDataSet.push([i])
+                            }
+                            btnCellIds = [];
+                            isBtnRenderingDone();
+                            performanceStore.removeAll();
+                            performanceStore.loadData(bigDataSet);
 
-        });
+                        }
+                    },
+                    buttonsNumberField,
+                    'Buttons'
+                ],
+                items: [
+                    {
+                        itemId: 'fastGrid',
+                        tbar: [
+                            'Grid rendered at:',
+                            columnButtonGridRenderingTimeLabel,
+                            'ms'
+                        ],
+                        store: performanceStore,
+                        viewConfig: {
+                            listeners: {
+                                refresh: function () {
+                                    var time = new Date().getTime() - startTime;
+                                    columnButtonGridRenderingTimeLabel.setValue(startTime ? time : '');
+                                }
+                            }
+                        },
+                        columns: [
+                            {
+                                text: 'Number',
+                                dataIndex: 'number',
+                                flex: 1,
+                                sortable: false,
+                                renderer: function (v) {
+                                    return '#' + v;
+                                }
+                            },
+                            {
+                                header: 'Column Button',
+                                xtype: 'buttoncolumn',
+                                width: 100,
+                                dataIndex: 'number',
+                                renderer: function (v) {
+                                    return 'Test #' + v;
+                                },
+                                items: [
+                                    // these will render as dropdown menu items when the arrow is clicked:
+                                    {text: 'Item 1', handler: function () {
+                                        alert("Item 1 clicked");
+                                    }},
+                                    {text: 'Item 2', handler: function () {
+                                        alert("Item 2 clicked");
+                                    }},
+                                    {text: 'Item 3', handler: function () {
+                                        alert("Item 3 clicked");
+                                    }},
+                                    {text: 'Item 4', handler: function () {
+                                        alert("Item 4 clicked");
+                                    }},
+                                    {text: 'Item 5', handler: function () {
+                                        alert("Item 5 clicked");
+                                    }}
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        tbar: [ 'Grid rendered at:',
+                                realButtonGridRenderingTimeLabel,
+                                'ms',
+                                '-',
+                                'Buttons rendered at:',
+                                buttonsRenderingTimeLabel,
+                                'ms'
+                        ],
+                        store: performanceStore,
+                        viewConfig: {
+                            listeners: {
+                                refresh: function () {
+                                    var time = new Date().getTime() - startTime;
+                                    realButtonGridRenderingTimeLabel.setValue(startTime ? time : '');
+                                    oldButtons = oldButtons.concat(buttons);
+                                    //Try to destroy orphan Buttons later
+                                    Ext.defer(function () {
+                                        var btn,
+                                                el,
+                                                index = oldButtons.length - 1;
 
-    </script>
+                                        for (; index >= 0; --index) {
+                                            btn = oldButtons[index];
+                                            el = btn && btn.getEl();
+                                            if (!el || !el.dom || Ext.getDom(Ext.id(el)) !== el.dom) {
+                                                // The component is no longer in the DOM
+                                                Ext.log('GC no DOM will be destroyed, comp with ID:' + btn.id);
+                                                btn.destroy();
+                                                Ext.Array.splice(oldButtons, index, 1);
+                                            }
+                                        }
+                                    }, 2000);
+                                    buttons = [];
+                                    //Start button rendering
+                                    var cellIndex = btnCellIds.length - 1,
+                                            cellId;
+                                    for (; cellIndex >= 0; --cellIndex) {
+                                        cellId = btnCellIds[cellIndex];
+                                        buttons.push(Ext.widget('splitbutton', {
+                                            renderTo: cellId,
+                                            text: 'Test #' + cellIndex,
+                                            width: 75,
+                                            listeners: {
+                                                afterrender: function (btn) {
+                                                    var id = btn.getId();
+                                                    btnToRenderCount--;
+                                                    Ext.log('Button to render:' + btnToRenderCount);
+                                                }
+                                            },
+                                            menu: new Ext.menu.Menu({
+                                                items: [
+                                                    // these will render as dropdown menu items when the arrow is clicked:
+                                                    {text: 'Item 1', handler: function () {
+                                                        alert("Item 1 clicked");
+                                                    }},
+                                                    {text: 'Item 2', handler: function () {
+                                                        alert("Item 2 clicked");
+                                                    }},
+                                                    {text: 'Item 3', handler: function () {
+                                                        alert("Item 3 clicked");
+                                                    }},
+                                                    {text: 'Item 4', handler: function () {
+                                                        alert("Item 4 clicked");
+                                                    }},
+                                                    {text: 'Item 5', handler: function () {
+                                                        alert("Item 5 clicked");
+                                                    }}
+                                                ]
+                                            })
+                                        }));
+                                    }
+                                }
+                            }
+                        },
+                        columns: [
+                            {
+                                text: 'Number',
+                                flex: 1,
+                                sortable: false,
+                                renderer: function (v) {
+                                    return '#' + v;
+                                },
+                                dataIndex: 'number'
+                            },
+                            {
+                                width: 100,
+                                header: 'Real Button',
+                                renderer: function (v, m, r) {
+                                    var id = 'columnBtn-' + Ext.id();
+                                    btnCellIds.push(id);
+                                    /*Ext.defer(function () {
+
+                                     }, 50);*/
+                                    return Ext.String.format('<div id="{0}"></div>', id);
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    });
+
+});
+
+</script>
 </head>
 
 <body>
