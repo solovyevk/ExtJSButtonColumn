@@ -9,19 +9,20 @@
       href="http://extjs-public.googlecode.com/svn/extjs-4.x/release/resources/css/ext-all.css"/>
 
 <script type="text/javascript" src="http://extjs-public.googlecode.com/svn/extjs-4.x/include/ext-all.js"></script>
+<!--provide extjs and uncomment for debugging-->
 <!--<link rel="stylesheet" type="text/css" href="extjs/resources/css/ext-all.css"/>
 
-<script type="text/javascript" src="extjs/ext-dev.js"></script>-->
+<script type="text/javascript" src="extjs/ext-dev.js"></script>
 
 <script type="text/javascript">
-  /*  Ext.Loader.setConfig({
+    Ext.Loader.setConfig({
         enabled: true,
         paths: {
             "Ext": "extjs/src"
         },
         disableCaching: false
-    }); */
-</script>
+    });
+</script>-->
 
 <script type="text/javascript" src="src/ux/ButtonColumn.js"></script>
 <style type="text/css">
@@ -58,6 +59,7 @@ Ext.define('StackDataModel', {
         {name: 'lastChange', type: 'date', dateFormat: 'n/j h:ia'}
     ]
 });
+Ext.require(['Ext.form.field.Number','Ext.tab.Panel','Ext.grid.Panel','Ext.toolbar.TextItem']);
 Ext.onReady(function () {
     var myData = [
                 ['3m Co', 71.72, 0.02, 0.03, '9/1 12:00am'],
