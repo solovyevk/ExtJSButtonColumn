@@ -34,6 +34,17 @@ Ext.define('Ext.ux.ButtonColumn', {
   extend: 'Ext.grid.column.Column',
   alias: ['widget.buttoncolumn'],
 
+  /* @cfg {String}  buttonText
+   * If defined, will be button text ,otherwise underlying store value will be used
+   */
+
+  /**
+   * @cfg {String} iconCls
+   * A CSS class to apply to the button. To determine the class dynamically, configure the Column with
+   * a `{@link #getClass}` function.
+   */
+
+
 
   /**
    * @cfg {Function} handler
@@ -54,13 +65,32 @@ Ext.define('Ext.ux.ButtonColumn', {
 
   /**
    * @cfg {Function} isDisabledFn
-   * A function called when render button.
-   * @cfg {Ext.view.Table} handler.view The owning TableView.
-   * @cfg {Number} handler.rowIndex The row index clicked on.
-   * @cfg {Number} handler.colIndex The column index clicked on.
+   * is an 'interceptor' method which can be used to disable button.
+   * @cfg {Object} isDisabledFn.value The data value for the current cell
+   * @cfg {Object} isDisabledFn.metaData A collection of metadata about the current cell;
+   * @cfg {Ext.data.Model} isDisabledFn.record The record for the current row
+   * @cfg {Number} isDisabledFn.rowIndex The index of the current row
+   * @cfg {Number} isDisabledFn.colIndex The index of the current column
+   * @cfg {Ext.data.Store} isDisabledFn.store The data store
+   * @cfg {Ext.view.View} isDisabledFn.view The current view
+   * @cfg {Boolean}isDisabledFn.return The disabled flag.
    */
 
-  /*
+  /**
+   * @cfg {Object[]} items
+   * An Array which may contain multiple menuItem actions definitions
+   **/
+
+  /**
+    * @cfg {Function} setupMenu
+    * is a 'hook' method which called to generate drop down menu for the record. The items config will be ignored
+    * @cfg {Object} setupMenu.record The record for the current row
+    * @cfg {Object} setupMenu.recordIndex The index of the current row
+    * @cfg Ext.menu.Item[]/Ext.Action[]/Object[] setupMenu.return array of menuItems config options.
+    */
+
+
+   /*
    * @cfg {Boolean} [stopSelection=true]
    * Prevent grid _row_ selection upon mousedown.
    */
@@ -80,10 +110,6 @@ Ext.define('Ext.ux.ButtonColumn', {
   menuAlign: 'tl-bl?',
 
   sortable: false,
-  /* @cfg {String}  buttonText
-   * If defined, will be button text.
-   */
-  // buttonText: '-Actions->',
 
 
   btnRe: new RegExp(Ext.baseCSSPrefix + 'btn'),
@@ -120,12 +146,13 @@ Ext.define('Ext.ux.ButtonColumn', {
     //init template
     me.initBtnTpl();
     me.renderer = function (v, meta, record) {
-      var data ={};
+      var data = {};
       data.buttonText = me.buttonText;
-      data.iconCls =  Ext.isFunction(me.getClass) ? me.getClass.apply(me, arguments) : (me.iconCls || 'x-hide-display');
+      data.iconCls = Ext.isFunction(me.getClass) ? me.getClass.apply(me, arguments) : (me.iconCls || 'x-hide-display');
       //allocate place for icon on button
       data.iconClsBtn = data.iconCls === 'x-hide-display' ? me.getBtnCls('noicon').join(' ') : me.getBtnCls('icon-text-left').join(' ');
-      data.disabledCls = me.isDisabledFn && me.isDisabledFn.apply(me, arguments) ? me.disabledCls + ' ' + me.getBtnCls('disabled').join(' ')/*(Ext.isIE7 ? me.disabledCls : me.disabledCls + ' ' + me.getBtnCls('disabled').join(' '))*/ : '';
+      data.disabledCls = me.isDisabledFn && me.isDisabledFn.apply(me,
+        arguments) ? me.disabledCls + ' ' + me.getBtnCls('disabled').join(' ')/*(Ext.isIE7 ? me.disabledCls : me.disabledCls + ' ' + me.getBtnCls('disabled').join(' '))*/ : '';
       v = Ext.isFunction(cfg.renderer) ? cfg.renderer.apply(this, arguments) : v;
       data.buttonText = data.buttonText ? data.buttonText : Ext.isEmpty(v) ? '--Action--' : v;
       return me.btnTpl.apply(data);

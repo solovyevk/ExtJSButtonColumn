@@ -60,9 +60,6 @@ Ext.define('StackDataModel', {
     ]
 });
 Ext.onReady(function () {
-    Ext.log('START');
-
-    // sample static data for the store
     var myData = [
                 ['3m Co', 71.72, 0.02, 0.03, '9/1 12:00am'],
                 ['Alcoa Inc', 29.01, 0.42, 1.47, '9/1 12:00am'],
@@ -215,6 +212,7 @@ Ext.onReady(function () {
                             var rec = grid.getStore().getAt(rowIndex);
                             alert(Ext.String.format('Please select & execute Action for "{0}"', rec.get('company')));
                         },
+                        stopSelection:true,        //don't select record on button click
                         isDisabledFn: function (v, meta, record) {
                             var a = arguments;
                             return record.get('price') > 70;
@@ -262,6 +260,7 @@ Ext.onReady(function () {
                         width: 100,
                         dataIndex: 'price',
                         sortable: true,
+                        stopSelection:true,     //don't select record on button click
                         renderer: function (v) {
                             return 'Buy for ' + Ext.util.Format.usMoney(v)
                         },
@@ -376,9 +375,7 @@ Ext.onReady(function () {
                                             var allDoneTime = new Date().getTime() - startTime;
                                             buttonsRenderingTimeLabel.setValue(allDoneTime);
                                             //loadMask.hide();
-                                            Ext.log('All Buttons rendered');
                                         } else {
-                                            Ext.log('Refire isBtnRenderingDone:' + btnToRenderCount);
                                             Ext.defer(isBtnRenderingDone, interval, me);
                                         }
                                     };
@@ -435,7 +432,6 @@ Ext.onReady(function () {
                                     return 'Test #' + v;
                                 },
                                 items: [
-                                    // these will render as dropdown menu items when the arrow is clicked:
                                     {text: 'Item 1', handler: function () {
                                         alert("Item 1 clicked");
                                     }},
@@ -482,7 +478,6 @@ Ext.onReady(function () {
                                             el = btn && btn.getEl();
                                             if (!el || !el.dom || Ext.getDom(Ext.id(el)) !== el.dom) {
                                                 // The component is no longer in the DOM
-                                                Ext.log('GC no DOM will be destroyed, comp with ID:' + btn.id);
                                                 btn.destroy();
                                                 Ext.Array.splice(oldButtons, index, 1);
                                             }
@@ -546,9 +541,6 @@ Ext.onReady(function () {
                                 renderer: function (v, m, r) {
                                     var id = 'columnBtn-' + Ext.id();
                                     btnCellIds.push(id);
-                                    /*Ext.defer(function () {
-
-                                     }, 50);*/
                                     return Ext.String.format('<div id="{0}"></div>', id);
                                 }
                             }
