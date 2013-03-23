@@ -95,12 +95,6 @@ Ext.define('Ext.ux.ButtonColumn', {
    * Prevent grid _row_ selection upon mousedown.
    */
 
-  /**
-   * @property {Array} items
-   * An array of action items copied from the configured {@link #cfg-items items} configuration. Each will have
-   * an `enable` and `disable` method added which will enable and disable the associated action, and
-   * update the displayed icon accordingly.
-   */
   header: '&#160;',
 
   /**
