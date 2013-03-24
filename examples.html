@@ -59,7 +59,7 @@ Ext.define('StackDataModel', {
         {name: 'lastChange', type: 'date', dateFormat: 'n/j h:ia'}
     ]
 });
-Ext.require(['Ext.form.field.Number','Ext.tab.Panel','Ext.grid.Panel','Ext.toolbar.TextItem']);
+Ext.require(['Ext.form.field.Number', 'Ext.tab.Panel', 'Ext.grid.Panel', 'Ext.toolbar.TextItem']);
 Ext.onReady(function () {
     var myData = [
                 ['3m Co', 71.72, 0.02, 0.03, '9/1 12:00am'],
@@ -213,7 +213,7 @@ Ext.onReady(function () {
                             var rec = grid.getStore().getAt(rowIndex);
                             alert(Ext.String.format('Please select & execute Action for "{0}"', rec.get('company')));
                         },
-                        stopSelection:true,        //don't select record on button click
+                        stopSelection: true,        //don't select record on button click
                         isDisabledFn: function (v, meta, record) {
                             var a = arguments;
                             return record.get('price') > 70;
@@ -261,7 +261,7 @@ Ext.onReady(function () {
                         width: 100,
                         dataIndex: 'price',
                         sortable: true,
-                        stopSelection:true,     //don't select record on button click
+                        stopSelection: true,     //don't select record on button click
                         renderer: function (v) {
                             return 'Buy for ' + Ext.util.Format.usMoney(v)
                         },
@@ -301,6 +301,10 @@ Ext.onReady(function () {
                             } else {
                                 return '';
                             }
+                        },
+                        handler: function (grid, rowIndex, colIndex) {
+                            var rec = grid.getStore().getAt(rowIndex);
+                            alert(Ext.String.format('Please select & execute Action for "{0}"', rec.get('company')));
                         },
                         setupMenu: function (record, rowIndex) {
                             var actions = [],
@@ -369,7 +373,7 @@ Ext.onReady(function () {
                         handler: function () {
                             var me = this,
                                     performanceTab = performanceTab || me.up('panel'),
-                                    //loadMask = new Ext.LoadMask(performanceTab),
+                            //loadMask = new Ext.LoadMask(performanceTab),
                                     interval = 1,
                                     isBtnRenderingDone = function () {
                                         if (btnToRenderCount === 0) {
