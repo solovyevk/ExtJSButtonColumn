@@ -234,7 +234,7 @@ Ext.define('Ext.ux.ButtonColumn', {
           if (me.setupMenu) {
             menuItems = me.setupMenu.call(me.setupMenuScope || me, record, recordIndex);
             menu.removeAll(true);
-            var i, l = menuItems.length
+            var i, l = menuItems.length;
             for (i = 0; i < l; i++) {
               menu.add(menuItems[i]);
             }
