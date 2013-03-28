@@ -113,7 +113,7 @@ Ext.define('Ext.ux.ButtonColumn', {
   triggerCls: 'x-btn-split x-btn-split-right',
 
   btnTpl: '<em class="{triggerCls}">' +
-          '<button autocomplete="off" role="button" hidefocus="true" type="button" class="x-btn-center" aria-haspopup="true">' +
+          '<button {tooltip} autocomplete="off" role="button" hidefocus="true" type="button" class="x-btn-center" aria-haspopup="true">' +
           '<span class="x-btn-inner">{buttonText}</span>' +
           '<span class="x-btn-icon {iconCls}">&nbsp;</span>' +
           '</button>' +
@@ -141,6 +141,7 @@ Ext.define('Ext.ux.ButtonColumn', {
     me.initBtnTpl();
     me.renderer = function (v, meta, record) {
       var data = {};
+      data.tooltip = me.tooltip ?  Ext.String.format('data-qtip="{0}"', me.tooltip) : '';
       data.buttonText = me.buttonText;
       data.iconCls = Ext.isFunction(me.getClass) ? me.getClass.apply(me, arguments) : (me.iconCls || 'x-hide-display');
       //allocate place for icon on button
