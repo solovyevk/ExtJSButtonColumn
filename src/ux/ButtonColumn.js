@@ -218,6 +218,7 @@ Ext.define('Ext.ux.ButtonColumn', {
       id:Ext.id(),
       href:false,
       type:'button',
+      glyph:'',
       baseCls: me.baseCls,
       splitCls: me.getSplitCls(),
       btnCls: me.extMinor === 1 ? me.getBtnCls() :''
