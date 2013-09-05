@@ -1,3 +1,5 @@
+//Ext.require("Ext.button.Button");
+
 Ext.define('Ext.ux.ButtonColumnMenuItem', {
   extend: 'Ext.menu.Item',
 
@@ -33,6 +35,7 @@ Ext.define('Ext.ux.ButtonColumnMenuItem', {
 Ext.define('Ext.ux.ButtonColumn', {
   extend: 'Ext.grid.column.Column',
   alias: ['widget.buttoncolumn'],
+  requires:['Ext.button.Button'],
 
   /* @cfg {String}  buttonText
    * If defined, will be button text ,otherwise underlying store value will be used
@@ -82,15 +85,15 @@ Ext.define('Ext.ux.ButtonColumn', {
    **/
 
   /**
-    * @cfg {Function} setupMenu
-    * is a 'hook' method which called to generate drop down menu for the record. The items config will be ignored
-    * @cfg {Object} setupMenu.record The record for the current row
-    * @cfg {Object} setupMenu.recordIndex The index of the current row
-    * @cfg Ext.menu.Item[]/Ext.Action[]/Object[] setupMenu.return array of menuItems config options.
-    */
+   * @cfg {Function} setupMenu
+   * is a 'hook' method which called to generate drop down menu for the record. The items config will be ignored
+   * @cfg {Object} setupMenu.record The record for the current row
+   * @cfg {Object} setupMenu.recordIndex The index of the current row
+   * @cfg Ext.menu.Item[]/Ext.Action[]/Object[] setupMenu.return array of menuItems config options.
+   */
 
 
-   /*
+  /*
    * @cfg {Boolean} [stopSelection=true]
    * Prevent grid _row_ selection upon mousedown.
    */
@@ -103,21 +106,73 @@ Ext.define('Ext.ux.ButtonColumn', {
    */
   menuAlign: 'tl-bl?',
 
+  extMinor:Ext.getVersion().getMinor(),
+
   sortable: false,
 
+  /**
+      * @cfg {String} [baseCls='x-btn']
+      * The base CSS class to add to all buttons.
+      */
+     baseCls: Ext.baseCSSPrefix + 'btn',
+
+  /**
+      * @cfg {String} arrowAlign
+      * The side of the Button box to render the arrow if the button has an associated {@link #cfg-menu}. Two
+      * values are allowed:
+      *
+      * - 'right'
+      * - 'bottom'
+      */
+     arrowAlign: 'right',
+
+     /**
+      * @cfg {String} arrowCls
+      * The className used for the inner arrow element if the button has a menu.
+      */
+     arrowCls: 'split',
+
+
+  /**
+   * @cfg {String} textAlign
+   * The text alignment for this button (center, left, right).
+   */
+  textAlign: 'center',
 
   btnRe: new RegExp(Ext.baseCSSPrefix + 'btn'),
 
   triggerRe: new RegExp(Ext.baseCSSPrefix + 'btn-split'),
 
-  triggerCls: 'x-btn-split x-btn-split-right',
+  //triggerCls: 'x-btn-split x-btn-split-right',
 
-  btnTpl: '<em class="{triggerCls}">' +
+  //TODO use button tpl here
+  /*btnTpl: '<em class="{splitCls}">' +
           '<button {tooltip} autocomplete="off" role="button" hidefocus="true" type="button" class="x-btn-center" aria-haspopup="true">' +
-          '<span class="x-btn-inner">{buttonText}</span>' +
+          '<span class="x-btn-inner">{text}</span>' +
           '<span class="x-btn-icon {iconCls}">&nbsp;</span>' +
           '</button>' +
-          '</em>',
+          '</em>',*/
+  /*btnTpl:     '<em id="{id}-btnWrap" class="{splitCls}">' +
+              '<tpl if="href">' +
+                  '<a id="{id}-btnEl" href="{href}" target="{target}"<tpl if="tabIndex"> tabIndex="{tabIndex}"</tpl> role="link">' +
+                      '<span id="{id}-btnInnerEl" class="{baseCls}-inner">' +
+                          '{text}' +
+                      '</span>' +
+                          '<span id="{id}-btnIconEl" class="{baseCls}-icon"></span>' +
+                  '</a>' +
+              '</tpl>' +
+              '<tpl if="!href">' +
+                  '<button id="{id}-btnEl" type="{type}" hidefocus="true"' +
+                      // the autocomplete="off" is required to prevent Firefox from remembering
+                      // the button's disabled state between page reloads.
+                      '<tpl if="tabIndex"> tabIndex="{tabIndex}"</tpl> role="button" autocomplete="off">' +
+                      '<span id="{id}-btnInnerEl" class="{baseCls}-inner" style="{innerSpanStyle}">' +
+                          '{text}' +
+                      '</span>' +
+                      '<span id="{id}-btnIconEl" class="{baseCls}-icon {iconCls}">&#160;</span>' +
+                  '</button>' +
+              '</tpl>' +
+          '</em>' ,*/
 
 
   constructor: function (config) {
@@ -130,6 +185,7 @@ Ext.define('Ext.ux.ButtonColumn', {
     //init menu
     if (items || me.setupMenu) {
       this.menu = Ext.create('Ext.menu.Menu');
+      me.split = true;
       if (items) {
         var i, l = items.length
         for (i = 0; i < l; i++) {
@@ -141,18 +197,35 @@ Ext.define('Ext.ux.ButtonColumn', {
     me.initBtnTpl();
     me.renderer = function (v, meta, record) {
       var data = {};
-      data.tooltip = me.tooltip ?  Ext.String.format('data-qtip="{0}"', me.tooltip) : '';
-      data.buttonText = me.buttonText;
+      data.tooltip = me.tooltip ? Ext.String.format('data-qtip="{0}"', me.tooltip) : '';
       data.iconCls = Ext.isFunction(me.getClass) ? me.getClass.apply(me, arguments) : (me.iconCls || 'x-hide-display');
       //allocate place for icon on button
-      data.iconClsBtn = data.iconCls === 'x-hide-display' ? me.getBtnCls('noicon').join(' ') : me.getBtnCls('icon-text-left').join(' ');
+      data.iconClsBtn = data.iconCls === 'x-hide-display' ? me.getBtnGroupCls('noicon').join(' ') : me.getBtnGroupCls('icon-text-left').join(' ');
       data.disabledCls = me.isDisabledFn && me.isDisabledFn.apply(me,
-        arguments) ? me.disabledCls + ' ' + me.getBtnCls('disabled').join(' ')/*(Ext.isIE7 ? me.disabledCls : me.disabledCls + ' ' + me.getBtnCls('disabled').join(' '))*/ : '';
+        arguments) ? me.disabledCls + ' ' + me.getBtnGroupCls('disabled').join(' ')/*(Ext.isIE7 ? me.disabledCls : me.disabledCls + ' ' + me.getBtnCls('disabled').join(' '))*/ : '';
       v = Ext.isFunction(cfg.renderer) ? cfg.renderer.apply(this, arguments) : v;
-      data.buttonText = data.buttonText ? data.buttonText : Ext.isEmpty(v) ? '--Action--' : v;
+      data.text = Ext.isEmpty(v) ? me.buttonText || '&#160;': v;
+      // Apply the renderData to the template args
+      Ext.applyIf(data, me.getTemplateArgs());
       return me.btnTpl.apply(data);
     };
   },
+
+
+  getTemplateArgs: function () {
+    var me = this;
+    return {
+      id:Ext.id(),
+      href:false,
+      type:'button',
+      baseCls: me.baseCls,
+      splitCls: me.getSplitCls(),
+      btnCls: me.extMinor === 1 ? me.getBtnCls() :''
+    };
+  },
+
+
+
 
   //private
   initBtnTpl: function () {
@@ -173,8 +246,6 @@ Ext.define('Ext.ux.ButtonColumn', {
                     '<TD style="BACKGROUND-POSITION: 0px -3px; HEIGHT: 3px" class="x-frame-bc x-btn-bc x-btn-default-small-bc" role=presentation></TD>' +
                     '<TD style="PADDING-LEFT: 3px; BACKGROUND-POSITION: right -15px" class="x-frame-br x-btn-br x-btn-default-small-br" role=presentation></TD>' +
                     '</TR></TBODY></TABLE>'
-    //The triggerCls class added if we have menu - it defined at design time (items array or setupMenu function in config)
-    me.btnTpl = me.btnTpl.replace('{triggerCls}', me.menu ? me.triggerCls : '');
     if (Ext.supports.CSS3BorderRadius) {
       me.btnTpl = Ext.create('Ext.XTemplate', Ext.String.format(mainDivStr, me.btnTpl))
     } else {
@@ -183,7 +254,7 @@ Ext.define('Ext.ux.ButtonColumn', {
   },
 
   //private
-  getBtnCls: function (suffix) {
+ getBtnGroupCls: function (suffix) {
     var cls = ['', 'btn-', 'btn-default-', 'btn-default-small-'],
       i, l;
     for (i = 0, l = cls.length; i < l; i++) {
@@ -220,8 +291,9 @@ Ext.define('Ext.ux.ButtonColumn', {
    */
   processEvent: function (type, view, cell, recordIndex, cellIndex, e) {
     var me = this,
-      btnMatch = e.getTarget().className.match(me.btnRe),
-      triggerMatch = e.getTarget().className.match(me.triggerRe);
+      target = e.getTarget();
+      btnMatch = target.className.match(me.btnRe) || target.localName == 'button' || target.localName == 'BUTTON',
+      triggerMatch = target.className.match(me.triggerRe);
     if (btnMatch) {
       var btnEl = Ext.fly(cell).down('div.x-btn');
       if (btnEl.hasCls(me.disabledCls)) {
@@ -255,15 +327,17 @@ Ext.define('Ext.ux.ButtonColumn', {
             me.handler.call(me.scope || me, view, recordIndex, cellIndex, e);
           }
         }
-      } else if (type == 'mouseover') {
-        btnEl.addCls(me.getBtnCls('over'));
-      } else if (type == 'mouseout') {
-        btnEl.removeCls(me.getBtnCls('over'));
-      } else if (type == 'mousedown') {
-        btnEl.addCls(me.getBtnCls('pressed'));
+        /* mouseover && mouseout doesn't work good in 4.2*/
+      } else if (type == 'mouseover' && me.extMinor != 2) {
+        btnEl.addCls(me.getBtnGroupCls('over'));
+      } else if (type == 'mouseout' && me.extMinor != 2) {
+        btnEl.removeCls(me.getBtnGroupCls('over'));
+      }
+       else if (type == 'mousedown') {
+        btnEl.addCls(me.getBtnGroupCls('pressed'));
         return me.stopSelection !== true;
       } else if (type == 'mouseup') {
-        btnEl.removeCls(me.getBtnCls('pressed'));
+        btnEl.removeCls(me.getBtnGroupCls('pressed'));
       }
     }
     return me.callParent(arguments);
@@ -283,4 +357,11 @@ Ext.define('Ext.ux.ButtonColumn', {
     }
     return items || [];
   }
+}, function() {
+   var buttonPrototype = Ext.button.Button.prototype;
+  //borrow buttons tpl
+   this.prototype.btnTpl = Ext.isArray(buttonPrototype.renderTpl) ? buttonPrototype.renderTpl.join('') : buttonPrototype.renderTpl;
+   //borrow buttons methods
+   this.prototype.getSplitCls = buttonPrototype.getSplitCls;
+   this.prototype.getBtnCls= buttonPrototype.getBtnCls;
 });
