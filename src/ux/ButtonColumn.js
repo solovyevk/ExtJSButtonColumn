@@ -143,38 +143,6 @@ Ext.define('Ext.ux.ButtonColumn', {
 
   triggerRe: new RegExp(Ext.baseCSSPrefix + 'btn-split'),
 
-  //triggerCls: 'x-btn-split x-btn-split-right',
-
-  //TODO use button tpl here
-  /*btnTpl: '<em class="{splitCls}">' +
-          '<button {tooltip} autocomplete="off" role="button" hidefocus="true" type="button" class="x-btn-center" aria-haspopup="true">' +
-          '<span class="x-btn-inner">{text}</span>' +
-          '<span class="x-btn-icon {iconCls}">&nbsp;</span>' +
-          '</button>' +
-          '</em>',*/
-  /*btnTpl:     '<em id="{id}-btnWrap" class="{splitCls}">' +
-              '<tpl if="href">' +
-                  '<a id="{id}-btnEl" href="{href}" target="{target}"<tpl if="tabIndex"> tabIndex="{tabIndex}"</tpl> role="link">' +
-                      '<span id="{id}-btnInnerEl" class="{baseCls}-inner">' +
-                          '{text}' +
-                      '</span>' +
-                          '<span id="{id}-btnIconEl" class="{baseCls}-icon"></span>' +
-                  '</a>' +
-              '</tpl>' +
-              '<tpl if="!href">' +
-                  '<button id="{id}-btnEl" type="{type}" hidefocus="true"' +
-                      // the autocomplete="off" is required to prevent Firefox from remembering
-                      // the button's disabled state between page reloads.
-                      '<tpl if="tabIndex"> tabIndex="{tabIndex}"</tpl> role="button" autocomplete="off">' +
-                      '<span id="{id}-btnInnerEl" class="{baseCls}-inner" style="{innerSpanStyle}">' +
-                          '{text}' +
-                      '</span>' +
-                      '<span id="{id}-btnIconEl" class="{baseCls}-icon {iconCls}">&#160;</span>' +
-                  '</button>' +
-              '</tpl>' +
-          '</em>' ,*/
-
-
   constructor: function (config) {
     var me = this,
       cfg = Ext.apply({}, config),
