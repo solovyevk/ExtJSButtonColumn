@@ -218,7 +218,10 @@ Ext.define('Ext.ux.ButtonColumn', {
       id:Ext.id(),
       href:false,
       type:'button',
+      /*Need empty values to avoid XTemplate undefined error
+      */
       glyph:'',
+      iconUrl:'',
       baseCls: me.baseCls,
       splitCls: me.getSplitCls(),
       btnCls: me.extMinor === 1 ? me.getBtnCls() :''
@@ -232,20 +235,20 @@ Ext.define('Ext.ux.ButtonColumn', {
   initBtnTpl: function () {
     var me = this,
       mainDivStr = '<div class="x-btn x-btn-default-small {iconClsBtn} {disabledCls}">{0}</div>',
-      btnFrameTpl = '<TABLE><TBODY><TR>' +
-                    '<TD style="PADDING-LEFT: 3px; BACKGROUND-POSITION: 0px -6px" class="x-frame-tl x-btn-tl x-btn-default-small-tl" role=presentation></TD>' +
-                    '<TD style="BACKGROUND-POSITION: 0px 0px; HEIGHT: 3px" class="x-frame-tc x-btn-tc x-btn-default-small-tc" role=presentation></TD>' +
-                    '<TD style="PADDING-LEFT: 3px; BACKGROUND-POSITION: right -9px" class="x-frame-tr x-btn-tr x-btn-default-small-tr" role=presentation></TD>' +
+      btnFrameTpl = '<TABLE  class="x-table-plain" cellPadding=0><TBODY><TR>' +
+                    '<TD'+ (me.extMinor != 2 ? ' style="PADDING-LEFT: 3px; BACKGROUND-POSITION: 0px -6px"' : '') + ' class="x-frame-tl x-btn-tl x-btn-default-small-tl" role=presentation></TD>' +
+                    '<TD'+ (me.extMinor != 2 ? ' style="BACKGROUND-POSITION: 0px 0px; HEIGHT: 3px"' : '')  + ' class="x-frame-tc x-btn-tc x-btn-default-small-tc" role=presentation></TD>' +
+                    '<TD'+ (me.extMinor != 2 ? ' style="PADDING-LEFT: 3px; BACKGROUND-POSITION: right -9px"' : '')  + ' class="x-frame-tr x-btn-tr x-btn-default-small-tr" role=presentation></TD>' +
                     '</TR><TR>' +
-                    '<TD style="PADDING-LEFT: 3px; BACKGROUND-POSITION: 0px 0px" class="x-frame-ml x-btn-ml x-btn-default-small-ml" role=presentation></TD>' +
-                    '<TD style="BACKGROUND-POSITION: 0px 0px" class="x-frame-mc x-btn-mc x-btn-default-small-mc" role=presentation>' +
+                    '<TD'+ (me.extMinor != 2 ? ' style="PADDING-LEFT: 3px; BACKGROUND-POSITION: 0px 0px"' : '')  + ' class="x-frame-ml x-btn-ml x-btn-default-small-ml" role=presentation></TD>' +
+                    '<TD'+ (me.extMinor != 2 ? ' style="BACKGROUND-POSITION: 0px 0px"' : '')  + ' class="x-frame-mc x-btn-mc x-btn-default-small-mc" role=presentation>' +
                     '{0}' +
                     '</TD>' +
-                    '<TD style="PADDING-LEFT: 3px; BACKGROUND-POSITION: right 0px" class="x-frame-mr x-btn-mr x-btn-default-small-mr" role=presentation></TD>' +
+                    '<TD'+ (me.extMinor != 2 ? ' style="PADDING-LEFT: 3px; BACKGROUND-POSITION: right 0px"' : '')  + ' class="x-frame-mr x-btn-mr x-btn-default-small-mr" role=presentation></TD>' +
                     '</TR><TR>' +
-                    '<TD style="PADDING-LEFT: 3px; BACKGROUND-POSITION: 0px -12px" class="x-frame-bl x-btn-bl x-btn-default-small-bl" role=presentation></TD>' +
-                    '<TD style="BACKGROUND-POSITION: 0px -3px; HEIGHT: 3px" class="x-frame-bc x-btn-bc x-btn-default-small-bc" role=presentation></TD>' +
-                    '<TD style="PADDING-LEFT: 3px; BACKGROUND-POSITION: right -15px" class="x-frame-br x-btn-br x-btn-default-small-br" role=presentation></TD>' +
+                    '<TD'+ (me.extMinor != 2 ? ' style="PADDING-LEFT: 3px; BACKGROUND-POSITION: 0px -12px"' : '')  + ' class="x-frame-bl x-btn-bl x-btn-default-small-bl" role=presentation></TD>' +
+                    '<TD'+ (me.extMinor != 2 ? ' style="BACKGROUND-POSITION: 0px -3px; HEIGHT: 3px"' : '')  + ' class="x-frame-bc x-btn-bc x-btn-default-small-bc" role=presentation></TD>' +
+                    '<TD'+ (me.extMinor != 2 ? ' style="PADDING-LEFT: 3px; BACKGROUND-POSITION: right -15px"' : '')  + ' class="x-frame-br x-btn-br x-btn-default-small-br" role=presentation></TD>' +
                     '</TR></TBODY></TABLE>'
     if (Ext.supports.CSS3BorderRadius) {
       me.btnTpl = Ext.create('Ext.XTemplate', Ext.String.format(mainDivStr, me.btnTpl))
@@ -293,8 +296,9 @@ Ext.define('Ext.ux.ButtonColumn', {
   processEvent: function (type, view, cell, recordIndex, cellIndex, e) {
     var me = this,
       target = e.getTarget();
-      btnMatch = target.className.match(me.btnRe) || target.localName == 'button' || target.localName == 'BUTTON',
+      btnMatch = target.className.match(me.btnRe) || target.localName == 'button' || target.nodeName == 'BUTTON',
       triggerMatch = target.className.match(me.triggerRe);
+    if(type)
     if (btnMatch) {
       var btnEl = Ext.fly(cell).down('div.x-btn');
       if (btnEl.hasCls(me.disabledCls)) {
