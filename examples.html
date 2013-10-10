@@ -5,26 +5,28 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>Extjs ButtonColumn Use Examples</title>
 
+
+
 <link rel="stylesheet" type="text/css"
       href="http://extjs-public.googlecode.com/svn/extjs-4.x/release/resources/css/ext-all.css"/>
 
 <script type="text/javascript" src="http://extjs-public.googlecode.com/svn/extjs-4.x/include/ext-all-dev.js"></script>
 
-<!--provide extjs and uncomment for debugging-->
-<!--
-<link rel="stylesheet" type="text/css" href="extjs/resources/css/ext-all.css"/>
 
-<script type="text/javascript" src="extjs/ext-dev.js"></script>
+
+<!--for debugging mode uncomment block below and comment one line above-->
+<!--<script type="text/javascript" src="http://extjs-public.googlecode.com/svn/extjs-4.x/release/ext-dev.js"></script>
 
 <script type="text/javascript">
     Ext.Loader.setConfig({
         enabled: true,
         paths: {
-            "Ext": "extjs/src"
+            "Ext": "http://extjs-public.googlecode.com/svn/extjs-4.x/release/src"
         },
         disableCaching: false
     });
 </script> -->
+
 
 <script type="text/javascript" src="src/ux/ButtonColumn.js"></script>
 <style type="text/css">
@@ -246,12 +248,16 @@ Ext.onReady(function () {
                     }
                 ]),
                 viewConfig: {
+                    mouseOverOutBuffer: false, /*need this to support blue highlight on mouse over in EtxJS 4.2.1*/
                     stripeRows: true
                 }
             },
             {
                 title: 'Just a Button',
                 store: store,
+                viewConfig: {
+                    mouseOverOutBuffer: false /*need this to support blue highlight on mouse over in EtxJS 4.2.1*/
+                },
                 columns: [
                     {
                         text: 'Company',
@@ -265,7 +271,7 @@ Ext.onReady(function () {
                         width: 130,
                         dataIndex: 'price',
                         sortable: true,
-                        tooltip:'Click to Buy!',
+                        tooltip: 'Click to Buy!',
                         stopSelection: true,     //don't select record on button click
                         renderer: function (v) {
                             return 'Buy for ' + Ext.util.Format.usMoney(v)
@@ -355,7 +361,8 @@ Ext.onReady(function () {
                     }
                 ]),
                 viewConfig: {
-                    stripeRows: true
+                    stripeRows: true,
+                    mouseOverOutBuffer: false /*need this to support blue highlight on mouse over in EtxJS 4.2.1*/
                 }
             },
             {
@@ -421,7 +428,8 @@ Ext.onReady(function () {
                                     var time = new Date().getTime() - startTime;
                                     columnButtonGridRenderingTimeLabel.setValue(startTime ? time : '');
                                 }
-                            }
+                            },
+                            mouseOverOutBuffer: false /*need this to support blue highlight on mouse over in EtxJS 4.2.1*/
                         },
                         columns: [
                             {
@@ -472,6 +480,7 @@ Ext.onReady(function () {
                         ],
                         store: performanceStore,
                         viewConfig: {
+                            mouseOverOutBuffer: false, /*need this to support blue highlight on mouse over in EtxJS 4.2.1*/
                             listeners: {
                                 refresh: function () {
                                     var time = new Date().getTime() - startTime;

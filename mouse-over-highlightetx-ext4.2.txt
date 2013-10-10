@@ -1,0 +1,36 @@
+I found that with buffering of mouseover and mouseout event handling on view items in Ext.view.View, 
+we losing "mouseout" event. It almost never get propogated down to the grid, only "mouseover":
+
+Here I just log event type at the beginning of  Ext.view.View.handleMouseOverOrOut method  src/view/View.js:480 
+as I move mouse accros grid view items
+
+1) Buffering - the default set with mouseOverOutBuffer for 20 milliseconds. The 'mouseout' event lost
+
+Ext.view.View.handleMouseOverOrOut - process event: mouseover
+Ext.view.View.handleMouseOverOrOut - process event: mouseover
+Ext.view.View.handleMouseOverOrOut - process event: mouseover
+Ext.view.View.handleMouseOverOrOut - process event: mouseover
+Ext.view.View.handleMouseOverOrOut - process event: mouseover
+
+2) No buffering - the mouseOverOutBuffer set to false. The 'mouseout' events propogated fine : . 
+
+
+Ext.view.View.handleMouseOverOrOut - process event: mouseover
+Ext.view.View.handleMouseOverOrOut - process event: mouseout
+Ext.view.View.handleMouseOverOrOut - process event: mouseover
+Ext.view.View.handleMouseOverOrOut - process event: mouseout
+Ext.view.View.handleMouseOverOrOut - process event: mouseover
+Ext.view.View.handleMouseOverOrOut - process event: mouseout
+
+Since Ext.ux.ButtonColumn blue highlight logic is driven by "mouseover" and"mouseout" events 
+we need to turn off buffer of mouseover and mouseout event o support it. It is done in grid config like this:
+
+viewConfig: {
+  mouseOverOutBuffer:false
+}
+
+I also had to reset "Ext.view.View" mouseOverItem flag - this is the only way
+to make mouseover && mouseout events fired correctly on grid cell. Otherwise just 'mouseout' get fired then we enter the cell, no events fired if move mouse inside grid cell
+
+
+
