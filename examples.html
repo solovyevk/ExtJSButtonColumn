@@ -306,6 +306,7 @@ Ext.onReady(function () {
                         xtype: 'buttoncolumn',
                         width: 120,
                         buttonText: 'Actions',
+                        bufferShowAfterHide:500,
                         getClass: function (v, meta, rec) {          // Or return a class from a function
                             if (rec.get('price') > 60) {
                                 return 'verify-btn';

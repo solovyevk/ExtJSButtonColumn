@@ -106,6 +106,12 @@ Ext.define('Ext.ux.ButtonColumn', {
    */
   menuAlign: 'tl-bl?',
 
+  /**
+   * @cfg {Number} bufferShowAfterHide
+   * Time buffer to prevent same row menu from showing again on click after it was hidden
+   */
+  bufferShowAfterHide:350,
+
   extMinor: Ext.getVersion().getMinor(),
 
   sortable: false,
@@ -242,7 +248,7 @@ Ext.define('Ext.ux.ButtonColumn', {
 
   showMenu: function (el) {
     var me = this;
-    if (me.lastMenuEl != el || !me.lastMenuHide || Ext.Date.getElapsed(me.lastMenuHide) > 250) {
+    if (me.lastMenuEl != el || !me.lastMenuHide || Ext.Date.getElapsed(me.lastMenuHide) > me.bufferShowAfterHide) {
       me.menu.showBy(el, me.menuAlign);
     }
     me.lastMenuEl = el;
