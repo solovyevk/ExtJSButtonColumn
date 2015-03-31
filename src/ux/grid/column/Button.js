@@ -137,10 +137,11 @@ Ext.define('Ext.ux.grid.column.Button', {
         {
           listeners: {
             mouseleave: function (menu, event) {
-              if(me.lastMenuElBox){
-                if(!((me.lastMenuElBox.x <= event.getX() && event.getX()  <= me.lastMenuElBox.right) &&
-                   (me.lastMenuElBox.y <= event.getY() && event.getY() <= me.lastMenuElBox.bottom))){
+              if(me.lastMenuCellBox){
+                if(!((me.lastMenuCellBox.x <= event.getX() && event.getX()  <= me.lastMenuCellBox.right) &&
+                   (me.lastMenuCellBox.y <= event.getY() && event.getY() <= me.lastMenuCellBox.bottom))){
                   menu.hide();
+                  Ext.log('hide mouse over menu');
                 }
               }
             }
@@ -203,16 +204,18 @@ Ext.define('Ext.ux.grid.column.Button', {
 
   showMenu: function (el) {
     var me = this;
-    if ( me.lastMenuElBox && me.lastMenuElBox.y === el.getBox().y && !me.menu.isHidden()) {
+    if ( me.lastMenuButtonBox && me.lastMenuButtonBox.y === el.getBox().y && !me.menu.isHidden()) {
       me.menu.hide();
     } else {
       me.menu.showBy(el, me.menuAlign);
     }
-    me.lastMenuElBox = el.getBox();
-    el.hover(Ext.emptyFn, function(event){
+    me.lastMenuButtonBox = el.getBox();
+    me.lastMenuCellEl = Ext.get(el.findParent('table.x-grid-item'));
+    me.lastMenuCellBox = me.lastMenuCellEl.getBox();
+    me.lastMenuCellEl.hover(Ext.emptyFn, function(event){
       var menuBox = me.menu.getBox();
-      if(!((menuBox.x <= event.getX() && event.getX()  <= menuBox.right) &&
-         (menuBox.y <= event.getY() && event.getY() <= menuBox.bottom))){
+        if(!((menuBox.x  <= event.getX() && event.getX()  <= menuBox.right) &&
+         (menuBox.y - 5 /*this for IE8*/ <= event.getY() && event.getY() <= menuBox.bottom))){
         me.menu.hide();
       }
     })
