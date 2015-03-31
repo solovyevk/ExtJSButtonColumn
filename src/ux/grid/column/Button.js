@@ -1,6 +1,4 @@
-//Ext.require("Ext.button.Button");
-
-Ext.define('Ext.ux.ButtonColumnMenuItem', {
+Ext.define('Ext.ux.grid.column.ButtonMenuItem', {
   extend: 'Ext.menu.Item',
 
   setState: function (state) {
@@ -32,7 +30,7 @@ Ext.define('Ext.ux.ButtonColumnMenuItem', {
 });
 
 
-Ext.define('Ext.ux.ButtonColumn', {
+Ext.define('Ext.ux.grid.column.Button', {
   extend: 'Ext.grid.column.Column',
   alias: ['widget.buttoncolumn'],
   requires: ['Ext.button.Button',
@@ -123,6 +121,8 @@ Ext.define('Ext.ux.ButtonColumn', {
 
   highlightOnMouseOver: true,
 
+  buttonClickMenuDown: false,
+
   constructor: function (config) {
     this.initBtnTpl(config);
     var me = this,
@@ -133,11 +133,23 @@ Ext.define('Ext.ux.ButtonColumn', {
     me.callParent([cfg]);
     //init menu
     if (items || me.setupMenu) {
-      this.menu = Ext.create('Ext.menu.Menu');
+      this.menu = Ext.create('Ext.menu.Menu',
+        {
+          listeners: {
+            mouseleave: function (menu, event) {
+              if(me.lastMenuElBox){
+                if(!((me.lastMenuElBox.x <= event.getX() && event.getX()  <= me.lastMenuElBox.right) &&
+                   (me.lastMenuElBox.y <= event.getY() && event.getY() <= me.lastMenuElBox.bottom))){
+                  menu.hide();
+                }
+              }
+            }
+          }
+        });
       if (items) {
         var i, l = items.length
         for (i = 0; i < l; i++) {
-          this.menu.add(new Ext.ux.ButtonColumnMenuItem(items[i]));
+          this.menu.add(new Ext.ux.grid.column.ButtonMenuItem(items[i]));
         }
       }
     }
@@ -175,7 +187,6 @@ Ext.define('Ext.ux.ButtonColumn', {
       '<div><a id="{id}" class="x-btn x-unselectable x-btn-default-small x-border-box {disabledCls}"' + buttonWidthStr + ' hidefocus="on" unselectable="on">');
     me.btnTpl = templateButton.getElConfig().tpl;
     me.btnTplData = templateButton.getElConfig().tplData;
-    Ext.log({msg: 'btnTplData', dump: me.btnTplData});
     Ext.destroy(templateButton);
   },
 
@@ -192,13 +203,19 @@ Ext.define('Ext.ux.ButtonColumn', {
 
   showMenu: function (el) {
     var me = this;
-    if (me.lastMenuEl == el && !me.menu.isHidden()) {
+    if ( me.lastMenuElBox && me.lastMenuElBox.y === el.getBox().y && !me.menu.isHidden()) {
       me.menu.hide();
     } else {
       me.menu.showBy(el, me.menuAlign);
     }
-    me.lastMenuEl = el;
-    return me;
+    me.lastMenuElBox = el.getBox();
+    el.hover(Ext.emptyFn, function(event){
+      var menuBox = me.menu.getBox();
+      if(!((menuBox.x <= event.getX() && event.getX()  <= menuBox.right) &&
+         (menuBox.y <= event.getY() && event.getY() <= menuBox.bottom))){
+        me.menu.hide();
+      }
+    })
   },
 
 
@@ -218,23 +235,15 @@ Ext.define('Ext.ux.ButtonColumn', {
   processEvent: function (type, view, cell, recordIndex, cellIndex, e) {
     var me = this,
       target = e.getTarget(),
-      triggerMatch = target.className.match(me.triggerRe);
-    /* mouseout not always cascade down here from Ext.view.View in Ext 5 because of this code: view/View.js:522
-     If you want button to be highlighted on mouse over reliably, set highlightOnMouseOver:true and comment out view/View.js:522 in override */
-    var btnEl = Ext.fly(cell).down(me.btnSelector);
-    if (btnEl.hasCls(me.disabledCls)) {
-      return me.stopSelection !== true;
-    }
-    if (type == 'click') {
-      btnEl.removeCls(me.getBtnGroupCls('over'));
-      if (triggerMatch) {
+      triggerMatch = target.className.match(me.triggerRe),
+      processMenu = function () {
         var record = view.getStore().getAt(recordIndex),
           menuItems,
           menu = me.menu;
-        if (me.setupMenu) {
-          menuItems = me.setupMenu.call(me.setupMenuScope || me, record, recordIndex);
+        if (me.setupMenu && Ext.isFunction(me.setupMenu)) {
+          menuItems = me.setupMenu.call(me.setupMenuScope || me, record, recordIndex, view);
           menu.removeAll(true);
-          var i, l = menuItems.length;
+          var i, l = menuItems.length
           for (i = 0; i < l; i++) {
             menu.add(menuItems[i]);
           }
@@ -248,14 +257,43 @@ Ext.define('Ext.ux.ButtonColumn', {
             });
           }, me);
         }
-        me.showMenu(btnEl);
-      } else {
+        if (me.onShowMenu && Ext.isFunction(me.onShowMenu)) {
+          me.onShowMenu.call(me.setupMenuScope || me, record, recordIndex);
+          /*to have time to adjust controls*/
+          Ext.defer(function () {
+            me.showMenu(btnEl);
+          }, 200);
+        } else {
+          me.showMenu(btnEl);
+        }
+      };
+    /* mouseout not always cascade down here from Ext.view.View in Ext 5 because of this code: view/View.js:522
+     If you want button to be highlighted on mouse over reliably, set highlightOnMouseOver:true and comment out view/View.js:522 in override */
+    var btnEl = Ext.fly(cell).down(me.btnSelector);
+    if (btnEl.hasCls(me.disabledCls)) {
+      return me.stopSelection !== true;
+    }
+
+
+    if (type == 'click') {
+      if (me.buttonClickMenuDown) {
+        processMenu();
         if (me.handler) {
           me.handler.call(me.scope || me, view, recordIndex, cellIndex, e);
         }
+      } else {
+        if (triggerMatch) {
+          processMenu();
+        } else {
+          if (me.handler) {
+            me.handler.call(me.scope || me, view, recordIndex, cellIndex, e);
+          }
+          //hide menu if click outside
+          me.menu.hide();
+        }
       }
-      /* mouseover && mouseout doesn't work good in 4.2 with  mouseover buffering */
-    } else if (type == 'mouseover' && me.highlightOnMouseOver) {
+    }
+    else if (type == 'mouseover' && me.highlightOnMouseOver) {
       if (!me.menu || !me.menu.isVisible()) {
         btnEl.addCls(me.getBtnGroupCls('over'));
       }
@@ -284,5 +322,12 @@ Ext.define('Ext.ux.ButtonColumn', {
       items.unshift(menu);
     }
     return items || [];
+  },
+
+  onFocusLeave: function (e) {
+    this.callParent([e]);
+    if (!this.menu.isHidden()) {
+      this.menu.hide();
+    }
   }
 });
