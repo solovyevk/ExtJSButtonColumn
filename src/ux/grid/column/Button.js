@@ -137,11 +137,10 @@ Ext.define('Ext.ux.grid.column.Button', {
         {
           listeners: {
             mouseleave: function (menu, event) {
-              if(me.lastMenuCellBox){
-                if(!((me.lastMenuCellBox.x <= event.getX() && event.getX()  <= me.lastMenuCellBox.right) &&
-                   (me.lastMenuCellBox.y <= event.getY() && event.getY() <= me.lastMenuCellBox.bottom))){
+              if (me.lastMenuCellBox) {
+                if (!((me.lastMenuCellBox.x <= event.getX() && event.getX() <= me.lastMenuCellBox.right) &&
+                      (me.lastMenuCellBox.y <= event.getY() && event.getY() <= me.lastMenuCellBox.bottom))) {
                   menu.hide();
-                  Ext.log('hide mouse over menu');
                 }
               }
             }
@@ -204,7 +203,7 @@ Ext.define('Ext.ux.grid.column.Button', {
 
   showMenu: function (el) {
     var me = this;
-    if ( me.lastMenuButtonBox && me.lastMenuButtonBox.y === el.getBox().y && !me.menu.isHidden()) {
+    if (me.lastMenuButtonBox && me.lastMenuButtonBox.y === el.getBox().y && !me.menu.isHidden()) {
       me.menu.hide();
     } else {
       me.menu.showBy(el, me.menuAlign);
@@ -212,13 +211,17 @@ Ext.define('Ext.ux.grid.column.Button', {
     me.lastMenuButtonBox = el.getBox();
     me.lastMenuCellEl = Ext.get(el.findParent('table.x-grid-item'));
     me.lastMenuCellBox = me.lastMenuCellEl.getBox();
-    me.lastMenuCellEl.hover(Ext.emptyFn, function(event){
-      var menuBox = me.menu.getBox();
-        if(!((menuBox.x  <= event.getX() && event.getX()  <= menuBox.right) &&
-         (menuBox.y - 5 /*this for IE8*/ <= event.getY() && event.getY() <= menuBox.bottom))){
-        me.menu.hide();
-      }
-    })
+    me.lastMenuCellEl.hover(Ext.emptyFn, me.onHoverOverCell, me);
+  },
+
+  //private
+  onHoverOverCell: function (event) {
+    var me = this,
+      menuBox = me.menu.getBox();
+    if (!((menuBox.x <= event.getX() && event.getX() <= menuBox.right) &&
+          (menuBox.y - 5 /*this for IE8*/ <= event.getY() && event.getY() <= menuBox.bottom))) {
+      me.menu.hide();
+    }
   },
 
 
