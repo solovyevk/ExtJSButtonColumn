@@ -14,4 +14,4 @@ Component migrated to ExtJS 5. Tested with 5.1.0 release.
 The Mouseout event not always cascade down to src/ux/ButtonColumn.js:218 from Ext.view.View in Ext 5 because of this code: view/View.js:522
 If you want button to be highlighted on mouse over reliably, set highlightOnMouseOver:true and comment out view/View.js:522 in override 
 
-
+Plans to updgrade to 6.x late 2017
